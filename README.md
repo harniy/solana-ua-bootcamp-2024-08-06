@@ -26,26 +26,29 @@ type Cluster = 'devnet' | 'testnet' | 'mainnet-beta';
 
 ## Commnds
 
-* `keypair:load` — Load wallet.
-> This command loads your wallet based on the value specified in the { SECRET_KEY } environment variable.
+### `keypair:load` — Load wallet.
 ```bash
 npm run keypair:load
 ```
+> This command loads your wallet based on the value specified in the { SECRET_KEY } environment variable.
 
-* `keypair:generate` — Generates a new wallet (key pair).
-> The command is used to generate a new wallet and corresponding key pair.
+
+###  `keypair:generate` — Generates a new wallet (key pair).
 ```bash
 npm run keypair:generate
 ```
+> The command is used to generate a new wallet and corresponding key pair.
 
-* `keypair:generate:prefix` — Creates a wallet (key pair) with the selected prefix.
-> This command generates a wallet with the prefix specified in { KEYPAIR_PREFIX }. Depending on the length of the prefix, the search operation may take a long time.
+
+###  `keypair:generate:prefix` — Creates a wallet (key pair) with the selected prefix.
 ```bash
 npm run keypair:generate:prefix
 ```
+> This command generates a wallet with the prefix specified in { KEYPAIR_PREFIX }. Depending on the length of the prefix, the search operation may take a long time.
 
-* `balance:check` — Loads wallet balance. 
-> The command checks the wallet balance using the value from { SECRET_KEY }.
+
+###  `balance:check` — Loads wallet balance. 
 ```bash
 npm run balance:check
 ```
+> The command checks the wallet balance using the value from { SECRET_KEY }.
