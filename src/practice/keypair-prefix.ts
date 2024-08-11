@@ -1,4 +1,4 @@
-import { Keypair, PublicKey, PublicKeyInitData } from "@solana/web3.js"
+import { Keypair, PublicKeyInitData } from "@solana/web3.js"
 import "dotenv/config"
 import { formatNumber, timeElapsed } from "../utils"
 
