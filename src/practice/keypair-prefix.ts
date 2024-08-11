@@ -1,8 +1,8 @@
-import { Keypair } from "@solana/web3.js"
+import { Keypair, PublicKey, PublicKeyInitData } from "@solana/web3.js"
 import "dotenv/config"
 import { formatNumber, timeElapsed } from "../utils"
 
-const PREFIX = process.env.KEYPAIR_PREFIX ?? ''
+const PREFIX: string = process.env.KEYPAIR_PREFIX ?? ''
 
 function hasPrefix (publicKey: string, prefix: string): boolean {
   return publicKey.startsWith(prefix)
@@ -21,14 +21,14 @@ async function generateKeypairWithPrefix (prefix: string): Promise<Keypair> {
   while (true) {
     count++
 
-    const keypair = Keypair.generate()
-    const publicKeyBase58 = keypair.publicKey.toBase58()
+    const keypair: Keypair = Keypair.generate()
+    const publicKeyBase58: PublicKeyInitData = keypair.publicKey.toBase58()
 
     if (count % 10000 === 0) {
         progress()
     }
 
-    if (hasPrefix(publicKeyBase58, prefix)) {
+    if (hasPrefix(String(publicKeyBase58), prefix)) {
       return keypair
     }
   }
