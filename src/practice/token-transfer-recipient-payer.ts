@@ -9,7 +9,7 @@ const sender = Keypair.fromSecretKey(secretKey)
 const cluster = process.env.CONNECTION_CLUSTER as Cluster
 const connection = new Connection(clusterApiUrl(cluster), 'confirmed')
 
-const recipient = Keypair.fromSecretKey(secretToUint8Array('pnkjmtnqAHiYGEUfAQHAQYAUZPY8NhSskFMpy6tchGEXsR47LJb5jNbcHzyys5xTgV4XRD6YorLgyYKWP5GZioV'))
+const recipient = Keypair.fromSecretKey(secretToUint8Array(process.env.RECIPIENT_SECRET_KEY))
 
 const tokenMintAddress = new PublicKey('A9FuuJQUpREZY8ZhX9VWtZXZHMDsZrmuFF2oqPZJxQLL')
 
