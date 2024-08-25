@@ -1,7 +1,23 @@
 import "dotenv/config"
-import { Cluster, clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, NONCE_ACCOUNT_LENGTH, NonceAccount, PublicKey, sendAndConfirmRawTransaction, SystemProgram, Transaction } from "@solana/web3.js"
+import {
+    Cluster,
+    clusterApiUrl,
+    Connection,
+    Keypair,
+    LAMPORTS_PER_SOL,
+    NONCE_ACCOUNT_LENGTH,
+    NonceAccount,
+    PublicKey,
+    sendAndConfirmRawTransaction,
+    SystemProgram,
+    Transaction
+} from "@solana/web3.js"
 import { secretToUint8Array } from "../utils"
-import { createTransferInstruction, getOrCreateAssociatedTokenAccount, getAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token"
+import {
+    createTransferInstruction,
+    getOrCreateAssociatedTokenAccount,
+    getAccount
+} from "@solana/spl-token"
 
 const secretKey = secretToUint8Array(process.env.SECRET_KEY)
 const sender = Keypair.fromSecretKey(secretKey)

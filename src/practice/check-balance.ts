@@ -1,5 +1,11 @@
 import "dotenv/config"
-import { Cluster, clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js"
+import {
+    Cluster,
+    clusterApiUrl,
+    Connection,
+    Keypair,
+    LAMPORTS_PER_SOL
+} from "@solana/web3.js"
 import { secretToUint8Array } from "../utils"
 
 const secretKey = secretToUint8Array(process.env.SECRET_KEY)
