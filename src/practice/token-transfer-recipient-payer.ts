@@ -1,5 +1,5 @@
 import "dotenv/config"
-import { Cluster, clusterApiUrl, Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js"
+import { Cluster, clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, NONCE_ACCOUNT_LENGTH, NonceAccount, PublicKey, sendAndConfirmRawTransaction, SystemProgram, Transaction } from "@solana/web3.js"
 import { secretToUint8Array } from "../utils"
 import { createTransferInstruction, getOrCreateAssociatedTokenAccount, getAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token"
 
@@ -12,6 +12,40 @@ const connection = new Connection(clusterApiUrl(cluster), 'confirmed')
 const recipient = Keypair.fromSecretKey(secretToUint8Array(process.env.RECIPIENT_SECRET_KEY))
 
 const tokenMintAddress = new PublicKey('A9FuuJQUpREZY8ZhX9VWtZXZHMDsZrmuFF2oqPZJxQLL')
+
+const USE_NONCE = true
+const nonceKeypair = Keypair.generate()
+const nonceAuthKP = sender
+
+if (USE_NONCE) {
+    const tx = new Transaction()
+
+    tx.feePayer = nonceAuthKP.publicKey
+
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+
+    tx.add(
+        SystemProgram.createAccount({
+            fromPubkey: nonceAuthKP.publicKey,
+            newAccountPubkey: nonceKeypair.publicKey,
+            lamports: 0.0015 * LAMPORTS_PER_SOL,
+            space: NONCE_ACCOUNT_LENGTH,
+            programId: SystemProgram.programId,
+        }),
+        SystemProgram.nonceInitialize({
+            noncePubkey: nonceKeypair.publicKey,
+            authorizedPubkey: nonceAuthKP.publicKey,
+        })
+    )
+
+    tx.sign(nonceKeypair, nonceAuthKP)
+
+    const sig = await sendAndConfirmRawTransaction(
+        connection,
+        tx.serialize({ requireAllSignatures: false })
+    )
+    console.log("Nonce initiated: ", sig)
+}
 
 async function createUnsignedTransactionForRecipient(
     connection: Connection,
@@ -47,15 +81,31 @@ async function createUnsignedTransactionForRecipient(
     }
 
     const transferInstruction = createTransferInstruction(
-        senderTokenAccount.address,  
+        senderTokenAccount.address,
         recipientTokenAccount.address,
-        sender.publicKey,           
-        amount                    
+        sender.publicKey,
+        amount
     )
 
-    const transaction = new Transaction().add(transferInstruction)
+    const transaction = new Transaction()
 
-    transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+    let blockhash = (await connection.getLatestBlockhash()).blockhash
+    if (USE_NONCE) {
+        const accountInfo = await connection.getAccountInfo(nonceKeypair.publicKey)
+        const nonceAccount = NonceAccount.fromAccountData(accountInfo.data)
+
+        const advanceIX = SystemProgram.nonceAdvance({
+            authorizedPubkey: nonceAuthKP.publicKey,
+            noncePubkey: nonceKeypair.publicKey
+        })
+
+        transaction.add(advanceIX)
+        blockhash = nonceAccount.nonce
+    }
+
+    transaction.add(transferInstruction)
+
+    transaction.recentBlockhash = blockhash
     transaction.feePayer = recipientPubkey
 
     transaction.partialSign(sender)
@@ -76,11 +126,16 @@ async function main() {
         transaction.partialSign(recipient)
 
         const serializedTransaction = transaction.serialize()
-        const signature = await connection.sendRawTransaction(serializedTransaction)
 
-        console.log('SENDER: ', sender.publicKey.toBase58())
-        console.log('RECIPIENT: ', recipient.publicKey.toBase58())
-        console.log('Transaction signature:', signature)
+        const sendAfterTime = USE_NONCE ? 123000 : 0
+        setTimeout(async () => {
+            const signature = await connection.sendRawTransaction(serializedTransaction)
+
+            console.log('TRANSACTION SEND AFTER TIME: ', sendAfterTime / 1000 + 's')
+            console.log('SENDER: ', sender.publicKey.toBase58())
+            console.log('RECIPIENT: ', recipient.publicKey.toBase58())
+            console.log('Transaction signature:', signature)
+        }, sendAfterTime)
     } catch (error) {
         console.error('Error:', error)
     }
